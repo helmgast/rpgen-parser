@@ -27,17 +27,10 @@ const match = rule => {
           identified: true,
           stat: stat,
           value: stats[1],
-          full: null,
           input: stats.input,
           choice: true
         };
       });
-
-      // if (rule.search(regexes.hasSkills) !== -1) {
-      //   // We also found skills in this.
-      //   const result = skillMatch(rule);
-      //   tmp.push(result);
-      // }
       return tmp;
     }
 
@@ -47,16 +40,9 @@ const match = rule => {
         identified: true,
         stat: stat,
         value: stats[1],
-        full: null,
         input: stats.input
       };
     });
-
-    // if (rule.search(regexes.hasSkills) !== -1) {
-    //   // We also found skills in this.
-    //   const result = skillMatch(rule);
-    //   tmp.push(result);
-    // }
     return tmp;
   }
 

@@ -3,7 +3,6 @@ const match = rule => {
     identified: true,
     karaktärsdrag: true,
     input: rule,
-    nyi: true,
     notAvailable: true
   };
 };

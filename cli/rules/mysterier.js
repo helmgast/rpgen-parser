@@ -1,15 +1,14 @@
 const regexes = {
-  pengar: new RegExp(/(\dT6×\d+)|(\d+).*(silver)/gi)
+  mysterier: new RegExp(/(\d+|ett|en)\smysterier?/i)
 };
-
 const match = rule => {
-  const pengar = rule.match(regexes.pengar);
-  if (pengar) {
+  const match = rule.match(regexes.mysterier);
+  if (match) {
     return {
       identified: true,
-      input: rule,
-      currency: pengar[2],
-      value: pengar[1]
+      mystery: true,
+      points: match[1],
+      input: rule
     };
   } else {
     return {

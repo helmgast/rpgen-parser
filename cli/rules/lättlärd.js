@@ -6,7 +6,7 @@ const {
 const regexes = {
   l_alla: new RegExp(/\salla\s/gi),
   l_one: new RegExp(/\sen\s/gi),
-  l_choice: new RegExp(/\svalfri\s/gi),
+  l_choice: new RegExp(/\svalfria?\s/gi),
   svårlärd: new RegExp(/\s?Svårlärd\s?/i)
 };
 
@@ -51,6 +51,15 @@ const match = rule => {
     // It a subset of a sub skill, ie. Pick one skill from the subset Rörelsefärdigheter
   } else if (rule.search(regexes.l_choice) !== -1) {
     const exists = matches(SKILL_CATEGORIES, rule);
+    if (!exists.length) {
+      // It's not a specific subset of skill categories, but ANY skill.
+      return {
+        identified: true,
+        input: rule,
+        skill: "Valfri",
+        cheap: true
+      };
+    }
     return exists.map(exist => ({
       identified: true,
       input: rule,

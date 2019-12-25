@@ -5672,7 +5672,7 @@ function hamta_handelsetabeller(){
 	handelsetabeller.kunskapmysterier[75].rubrik = "Provat underliga droger"
 	handelsetabeller.kunskapmysterier[75].beskrivning = "Rollpersonen har provat en underlig drogmixtur som har haft en sällsam effekt. Under ett rus upplevde rollpersonen skrämmande och fascinerande händelser och efter upplevelsen så var denne förändrad. Exakt vad denne fick för insikt under ruset är upp till spelaren."
 	handelsetabeller.kunskapmysterier[75].beskrivninghak = "\+2 Vilja, Psyke, Visdom eller Utstrålning"
-	handelsetabeller.kunskapmysterier[75].beskrivninghak = "";
+	// handelsetabeller.kunskapmysterier[75].beskrivninghak = "";
 	
 	handelsetabeller.kunskapmysterier[75].subval[0][0][0] = {};
 	handelsetabeller.kunskapmysterier[75].subval[0][0][0].valdasub = [];

@@ -1,4 +1,5 @@
 const _ = require("lodash");
+const { isArray } = require("util");
 const { ALL_SKILLS } = require("../data/rulesets/eon/starting_skills");
 const lättlärdMatch = require("./rules/lättlärd.js");
 const egenskaperMatch = require("./rules/egenskaper.js");
@@ -12,6 +13,8 @@ const pengarMatch = require("./rules/pengar.js");
 const hantverkMatch = require("./rules/hantverk.js");
 const karaktärsdragMatch = require("./rules/karaktärsdrag.js");
 const händelsetabellMatch = require("./rules/händelsetabell.js");
+const doserMatch = require("./rules/doser.js");
+const mysterierMatch = require("./rules/mysterier.js");
 
 // MOVE TO CENTRAL FILE
 const regexes = {
@@ -21,13 +24,15 @@ const regexes = {
   skillValue: new RegExp(/(enhet|enheter)/gi),
   expertis: new RegExp(/\s?Expertis(en)?\s?/gi),
   hantverk: new RegExp(/\s?Hantverk(et)?\s?/gi),
-  kännetecken: new RegExp(/\s?Kännetecknet?\s?(\D*)(\dT6)/gi),
-  avtrubbning: new RegExp(/\s?(\d?)\s?Avtrubbningskryss\s?för\s?(\D*)/gi),
+  kännetecken: new RegExp(/Känneteck(en|net)?/gi),
+  avtrubbning: new RegExp(/\s?(\d?)\s?Avtrubbningskryss\s?(för)?\s?(\D*)/gi),
   fokus: new RegExp(/Fokus/g),
   bakgrund: new RegExp(/(bakgrundstabellen|bakgrund)/gi),
   händelsetabell: new RegExp(/(händelsetabell)/gi),
-  pengar: new RegExp(/(\+\d|\–\d|\dT6).*(silver)/gi),
-  karaktärsdrag: new RegExp(/Karaktärsdrag/gi)
+  pengar: new RegExp(/(\+\d|\–\d|\dT6|\d+).*(silver)/gi),
+  karaktärsdrag: new RegExp(/Karaktärsdrag/gi),
+  doser: new RegExp(/(\d+)\sdoser/gi),
+  mysterier: new RegExp(/(\d+|ett|en)\smysterier?/i)
 };
 
 const ruleDefinitionSplitter = ".";
@@ -47,110 +52,135 @@ const exceptions = [
   "Rollpersonen blir endast väckt av någon om denne aktivt försöker väcka rollpersonen, och trots detta får rollpersonen tidigast agera 3 stridsrundor senare",
   "En gång per spelmöte kan spelaren slå om ett valfritt färdighetsslag som denne just misslyckats med eller om denne blivit missnöjd över resultatet",
   "Rollpersonen får en Tvångshandling",
-  "Rollpersonen kan etablera värdshuset då det passar i spel"
+  "Rollpersonen kan etablera värdshuset då det passar i spel",
+  "Ignorerar efterverkningen Omtöcknad och får en bonus på +3T6 när det gäller att hålla andan eller uthärda syrebrist, exempelvis vid dykning eller strypning",
+  "Denne hatar rollpersonen",
+  "Rollpersonen har lärt känna en dryckeskamrat",
+  "Spelaren kan etablera denne i spel när det passar",
+  "Spelaren kan introducera fastigheten i spelet när denna finner det lämpligt",
+  "Spelaren kan etablera favorithaket i spel när det är lämpligt och om spelledaren bedömer det troligt"
 ];
 
+const addToEffects = (effects, result) => {
+  if (isArray(result)) {
+    return effects.concat(result);
+  } else {
+    return effects.concat([result]);
+  }
+};
+
 const identifyTokenFromRule = (rule, line) => {
-  if (!line.length || !rule.length) {
-    return [];
+  // console.log("identify", rule);
+  if (!Object.keys(line).length || !rule.length) {
+    throw new Error("IdentiyTokenFromRule received empty rule and line");
   }
 
   // TODO: Make a specific function for each matcher that does multiple checks (and not just using .test)
-  const effects = [];
+  let effects = [];
   if (rule.match(regexes.lättlärd)) {
     const result = lättlärdMatch(rule);
-    effects.push(result);
+    effects = addToEffects(effects, result);
   }
 
   if (rule.match(regexes.stat) || rule.match(regexes.multiple_stat)) {
     const result = egenskaperMatch(rule);
-    effects.push(result);
+    effects = addToEffects(effects, result);
   }
 
   if (rule.match(regexes.skillValue) || rule.includes("enheter")) {
     const result = enheterMatch(rule);
-    effects.push(result);
+    effects = addToEffects(effects, result);
   }
 
   if (rule.match(regexes.expertis)) {
     const result = expertisMatch(rule);
-    effects.push(result);
+    effects = addToEffects(effects, result);
   }
 
   if (rule.match(regexes.kännetecken)) {
     const result = känneteckenMatch(rule);
-    effects.push(result);
+    effects = addToEffects(effects, result);
   }
 
   if (rule.match(regexes.avtrubbning)) {
     const result = avtrubbningsMatch(rule);
-    effects.push(result);
+    effects = addToEffects(effects, result);
   }
 
   if (rule.match(regexes.fokus)) {
     const result = fokusMatch(rule);
-    effects.push(result);
+    effects = addToEffects(effects, result);
   }
 
   if (rule.match(regexes.bakgrund)) {
     const result = bakgrundsMatch(rule);
-    effects.push(result);
+    effects = addToEffects(effects, result);
   }
 
   if (rule.match(regexes.pengar)) {
     const result = pengarMatch(rule);
-    effects.push(result);
+    effects = addToEffects(effects, result);
   }
 
   if (rule.match(regexes.hantverk)) {
     const result = hantverkMatch(rule);
-    effects.push(result);
+    effects = addToEffects(effects, result);
   }
 
   if (rule.match(regexes.karaktärsdrag)) {
     const result = karaktärsdragMatch(rule);
-    effects.push(result);
+    effects = addToEffects(effects, result);
   }
 
   if (rule.match(regexes.händelsetabell)) {
     const result = händelsetabellMatch(rule);
-    effects.push(result);
+    effects = addToEffects(effects, result);
+  }
+
+  if (rule.match(regexes.doser)) {
+    const result = doserMatch(rule);
+    effects = addToEffects(effects, result);
+  }
+
+  if (rule.match(regexes.mysterier)) {
+    const result = mysterierMatch(rule);
+    effects = addToEffects(effects, result);
   }
 
   if (!effects.length) {
-    if (exceptions.includes(rule)) {
-      effects.push({
-        identified: true,
-        notAvailable: true,
-        input: rule
-      });
-    } else {
-      console.log("Could not parse rule: ", JSON.stringify(rule));
-      process.exit(0);
-      effects.push({
-        identified: false,
-        input: rule
-      });
-    }
+    console.log("Could not parse rule: ", JSON.stringify(rule));
+    effects.push({
+      identified: false,
+      input: rule
+    });
   }
 
   return effects;
 };
 
-const parseLineForRuleDefinitions = line => {
-  if (!line) {
-    return null;
+const getPossibleRulesFromLine = line => {
+  const { beskrivninghak: effect } = line;
+
+  if (!line || !effect) {
+    console.log(line);
+    throw new Error(`Passed an invalid rule ('${effect}')`);
   }
-  const possibleRules = line.split(ruleDefinitionSplitter);
+  const possibleRules = effect.split(ruleDefinitionSplitter);
   if (possibleRules.length <= 0) {
-    return null;
+    throw new Error(`Could not parse any rules from line: ('${effect}')`);
   }
 
+  return possibleRules.map(rule => rule.trim()).filter(Boolean);
+};
+
+const parseLineForRuleDefinitions = line => {
+  const possibleRules = getPossibleRulesFromLine(line);
+
   const effects = possibleRules
-    .map(rule => identifyTokenFromRule(rule.trim(), line))
+    .map(rule => identifyTokenFromRule(rule, line))
     .map(effect => {
       if (effect.length && effect.map(i => i.identified)) {
-        return effect;
+        return effect[0];
       }
       return null;
     })
@@ -159,9 +189,10 @@ const parseLineForRuleDefinitions = line => {
   if (effects && effects.length) {
     // console.log("effects", effects);
   }
-  return effects[0];
+  return effects;
 };
 
 module.exports = {
-  parseLineForRuleDefinitions
+  parseLineForRuleDefinitions,
+  getPossibleRulesFromLine
 };

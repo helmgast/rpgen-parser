@@ -1,10 +1,10 @@
 {
-  "name": "eon-character-parser",
+  "name": "rpgen-parser",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "ava --verbose --serial"
+    "test": "ava --verbose --serial __tests__/events.test.js"
   },
   "keywords": [],
   "author": "",
@@ -15,6 +15,7 @@
     "random-js": "^2.1.0"
   },
   "devDependencies": {
-    "ava": "^2.4.0"
+    "ava": "^2.4.0",
+    "prettyoutput": "^1.2.0"
   }
 }

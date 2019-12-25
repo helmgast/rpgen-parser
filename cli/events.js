@@ -28,12 +28,23 @@ const validateExtraProperties = item => {
   });
 };
 
-const parseRuleDefinition = event => {
-  const { beskrivninghak: effect } = event;
-  // console.log(effect);
-  const defs = parseLineForRuleDefinitions(effect);
-  // console.log("----------------");
-  return defs;
+const parseRuleDefinition = (rule, DEBUG = false) => {
+  if (DEBUG) {
+    console.log("----------------");
+    console.log(rule.beskrivninghak);
+    console.log("----------------");
+  }
+
+  const effects = parseLineForRuleDefinitions(rule);
+  const { rubrik, beskrivning, beskrivninghak, tabellnamn, nummer } = rule;
+  return {
+    rubrik: rubrik,
+    beskrivning: beskrivning,
+    effekt: beskrivninghak,
+    tabell: tabellnamn,
+    nummer: nummer,
+    effects: effects
+  };
 };
 
 const getEventSubInfo = ev => {
@@ -86,7 +97,6 @@ const writeEffectInfo = ev => {
 };
 
 const writeEvents = () => {
-  console.log("Writing events");
   return new Promise(async (resolve, reject) => {
     const eventsResult = {};
     const events = generateHandelse();
